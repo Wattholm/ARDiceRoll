@@ -13,6 +13,7 @@
 		0A824B8F225C7E3E004D37BE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A824B8D225C7E3E004D37BE /* Main.storyboard */; };
 		0A824B91225C7E42004D37BE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A824B90225C7E42004D37BE /* Assets.xcassets */; };
 		0A824B94225C7E42004D37BE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A824B92225C7E42004D37BE /* LaunchScreen.storyboard */; };
+		0A824B9C225C830C004D37BE /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 0A824B9B225C830C004D37BE /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		0A824B90225C7E42004D37BE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0A824B93225C7E42004D37BE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0A824B95225C7E42004D37BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0A824B9B225C830C004D37BE /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +42,7 @@
 		0A824B7B225C7E3D004D37BE = {
 			isa = PBXGroup;
 			children = (
+				0A824B9B225C830C004D37BE /* .gitignore */,
 				0A824B86225C7E3D004D37BE /* ARDiceRoll */,
 				0A824B85225C7E3D004D37BE /* Products */,
 			);
@@ -57,9 +60,9 @@
 			isa = PBXGroup;
 			children = (
 				0A824B87225C7E3D004D37BE /* AppDelegate.swift */,
-				0A824B89225C7E3E004D37BE /* art.scnassets */,
 				0A824B8B225C7E3E004D37BE /* ViewController.swift */,
 				0A824B8D225C7E3E004D37BE /* Main.storyboard */,
+				0A824B89225C7E3E004D37BE /* art.scnassets */,
 				0A824B90225C7E42004D37BE /* Assets.xcassets */,
 				0A824B92225C7E42004D37BE /* LaunchScreen.storyboard */,
 				0A824B95225C7E42004D37BE /* Info.plist */,
@@ -125,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A824B9C225C830C004D37BE /* .gitignore in Resources */,
 				0A824B8A225C7E3E004D37BE /* art.scnassets in Resources */,
 				0A824B94225C7E42004D37BE /* LaunchScreen.storyboard in Resources */,
 				0A824B91225C7E42004D37BE /* Assets.xcassets in Resources */,
@@ -289,6 +293,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9V37J2YB3S;
 				INFOPLIST_FILE = ARDiceRoll/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -307,6 +312,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9V37J2YB3S;
 				INFOPLIST_FILE = ARDiceRoll/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
