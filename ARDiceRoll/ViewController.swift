@@ -13,6 +13,7 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
     
     var diceArray = [SCNNode]()
+    var diceArrayValues = [Int]()
     
     @IBOutlet var sceneView: ARSCNView!
     
@@ -23,7 +24,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.delegate = self
 
         // Show feature points as the plane detection is being processed
-        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
+        // sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
         
 //        // Node for Dice
 //        let diceGeo = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.005)
@@ -113,44 +114,54 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             if let hitResult = results.first {
                 // print(hitResult)
-
-                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
-                let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true)
-                diceNode?.position = SCNVector3(
-                    x: hitResult.worldTransform.columns.3.x,
-                    // Add half of the height of the dice so they appear exactly on planar surface
-                    y: hitResult.worldTransform.columns.3.y + (diceNode?.boundingSphere.radius)!,
-                    z: hitResult.worldTransform.columns.3.z
-                )
                 
-                // Add the new Die to the array of Dice Nodes
-                diceArray.append(diceNode!)
-                
-                sceneView.scene.rootNode.addChildNode(diceNode!)
-                
-                roll(dice: diceNode!)
- 
+                // Max 10 Dice
+                if diceArray.count < 10 {
+                    addDice(atLocation: hitResult)
+                }
             }
             
         }
     }
     
+    func addDice(atLocation hitResult: ARHitTestResult) {
+        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+        let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true)
+        diceNode?.position = SCNVector3(
+            x: hitResult.worldTransform.columns.3.x,
+            // Add half of the height of the dice so they appear exactly on planar surface
+            y: hitResult.worldTransform.columns.3.y + (diceNode?.boundingSphere.radius)!,
+            z: hitResult.worldTransform.columns.3.z
+        )
+        
+        // Add the new Die to the array of Dice Nodes
+        diceArray.append(diceNode!)
+        // Initialize the Dice Values Array with the Die's default face value (2) as well
+        diceArrayValues.append(2)
+        
+        sceneView.scene.rootNode.addChildNode(diceNode!)
+        
+        roll(dice: diceNode!, atIndex: diceArray.count - 1)
+    }
+    
     func rollAll() {
         if !diceArray.isEmpty {
-            for dice in diceArray {
-                roll(dice: dice)
+            
+            for (index, _) in diceArray.enumerated() {
+                roll(dice: diceArray[index], atIndex: index)
             }
         }
     }
     
-    func roll(dice: SCNNode) {
-        // Dice face shows 2 as default
+    func roll(dice: SCNNode, atIndex index: Int) {
+        
+        let current6 = diceArrayValues[index]
         
         let random6 = Float(arc4random_uniform(6) + 1)
         var randomX: Float
         var randomZ: Float
         
-        print(random6)
+        print(Int(random6))
         
         switch random6 {
             
@@ -175,6 +186,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         default:
             fatalError("This should never occur. Random Roll should be from 1 to 6.")
         }
+
+        // Modify rotation to return the die face to 2 before randomizing it again, so we can keep track of the face value
+        switch current6 {
+        case 1:
+            randomX = randomX - Float.pi/2
+        case 2:
+            randomX = randomX + 0
+        case 3:
+            randomZ = randomZ - Float.pi/2
+        case 4:
+            randomX = randomX - Float.pi
+        case 5:
+            randomZ = randomZ + Float.pi/2
+        case 6:
+            randomX = randomX - Float.pi * (3/2)
+        default:
+            fatalError("This should never occur. Random Roll should be from 1 to 6.")
+        }
         
         dice.runAction(SCNAction.rotateBy(
             x: CGFloat(6 * Float.pi + randomX),
@@ -182,7 +211,50 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             z: CGFloat(6 * Float.pi + randomZ),
             duration: 0.5)
         )
+        
+        diceArrayValues[index] = Int(random6)
+        
+        if diceArray.count == (index + 1) {
+            
+            print("Setting title with number of dice and sum of rolls..")
+            
+            var sumOfDiceRolls = 0
+            for value in diceArrayValues {
+                sumOfDiceRolls += value
+            }
+            
+            print("Number of Dice: \(index + 1)")
+            print("Sum of Rolls: \(sumOfDiceRolls)")
+            
+            self.title = "AR Dice Roll (\(diceArray.count) dice): \(sumOfDiceRolls)"
+        }
+        
     }
+    
+    @IBAction func rollAgain(_ sender: UIBarButtonItem) {
+        
+        // Clicking the Refresh Button will reroll all existing dice
+        rollAll()
+    }
+    
+    @IBAction func removeAllDice(_ sender: UIBarButtonItem) {
+        
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                dice.removeFromParentNode()
+            }
+        }
+        
+        diceArray = []
+        diceArrayValues = []
+        
+    }
+    
+    
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        rollAll()
+    }
+    
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor {
