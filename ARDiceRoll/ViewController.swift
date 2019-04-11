@@ -19,47 +19,55 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the view's delegate
         sceneView.delegate = self
-        
-        // Node for Dice
-        let diceGeo = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.005)
-        let diceMat = SCNMaterial()
-        diceMat.diffuse.contents = UIColor.blue
-        diceGeo.materials = [diceMat]
-        let diceNode = SCNNode()
-        diceNode.position = SCNVector3(x:0, y:-1, z:-0.5)
-        // Give the node a geometry of cube
-        diceNode.geometry = diceGeo
-        
-        // Node for Earth
-        let earthGeo = SCNSphere(radius: 0.2)
-        let earthMat = SCNMaterial()
-        earthMat.diffuse.contents = UIImage(named: "art.scnassets/earth_day_2k.jpg")
-        earthGeo.materials = [earthMat]
-        let earthNode = SCNNode()
-        earthNode.position = SCNVector3(x:1, y:0.1, z:-0.7)
-        // Give the node a geometry of cube
-        earthNode.geometry = earthGeo
 
-        sceneView.scene.rootNode.addChildNode(diceNode)
-        sceneView.scene.rootNode.addChildNode(earthNode)
+        // Show feature points as the plane detection is being processed
+        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
+        
+//        // Node for Dice
+//        let diceGeo = SCNBox(width: 0.05, height: 0.05, length: 0.05, chamferRadius: 0.005)
+//        let diceMat = SCNMaterial()
+//        diceMat.diffuse.contents = UIColor.blue
+//        diceGeo.materials = [diceMat]
+//        let diceNode = SCNNode()
+//        diceNode.position = SCNVector3(x:0, y:-1, z:-0.5)
+//        // Give the node a geometry of cube
+//        diceNode.geometry = diceGeo
+//
+//        // Node for Earth
+//        let earthGeo = SCNSphere(radius: 0.2)
+//        let earthMat = SCNMaterial()
+//        earthMat.diffuse.contents = UIImage(named: "art.scnassets/earth_day_2k.jpg")
+//        earthGeo.materials = [earthMat]
+//        let earthNode = SCNNode()
+//        earthNode.position = SCNVector3(x:1, y:0.1, z:-0.7)
+//        // Give the node a geometry of cube
+//        earthNode.geometry = earthGeo
+//
+//        sceneView.scene.rootNode.addChildNode(diceNode)
+//        sceneView.scene.rootNode.addChildNode(earthNode)
         
         sceneView.autoenablesDefaultLighting = true
         
         
         //// Code from default AR Project
         // Show statistics such as fps and timing information
-        //sceneView.showsStatistics = true
+        // sceneView.showsStatistics = true
         
-        // Create a new scene
-        //let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        // Create a new scene: diceScene
+        
+//        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+//        let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true)
+//        diceNode?.position = SCNVector3(x: 0, y: 0, z: -0.2)
+//        sceneView.scene.rootNode.addChildNode(diceNode!)
         
         // Set the scene to the view
-        //sceneView.scene = scene
+        // sceneView.scene = diceScene
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         
         print("Session is supported = \(ARConfiguration.isSupported)")
         print("World Tracking is supported = \(ARWorldTrackingConfiguration.isSupported)")
@@ -67,15 +75,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if ARWorldTrackingConfiguration.isSupported {
             // Use Configuration Compatible with AR9+ Chips
             let configuration = ARWorldTrackingConfiguration()
+            
+            configuration.planeDetection = .horizontal
+            
             // Run the view's session
             sceneView.session.run(configuration)
+            
         } else {
             // Use Configuration for older models with processors lower than AR9
             let configuration = AROrientationTrackingConfiguration()
+            
             // Run the view's session
             sceneView.session.run(configuration)
         }
-        
+       
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -85,7 +98,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 
-
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        if anchor is ARPlaneAnchor {
+            
+            print("Plane detected.")
+            let planeAnchor = anchor as! ARPlaneAnchor
+            let planeGeo = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+            let planeNode = SCNNode()
+            planeNode.position = SCNVector3(x: planeAnchor.center.x, y: 0, z: planeAnchor.center.z)
+            // Rotation is counterclockwise and 180 degrees is Pi radians
+            planeNode.transform = SCNMatrix4MakeRotation( -Float.pi/2, 1, 0, 0)
+            
+            let gridMaterial = SCNMaterial()
+            gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+            planeGeo.materials = [gridMaterial]
+            planeNode.geometry = planeGeo
+            
+            node.addChildNode(planeNode)
+            
+        } else {
+            return
+        }
+    }
 
 
 
