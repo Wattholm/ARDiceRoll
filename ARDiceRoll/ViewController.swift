@@ -11,7 +11,9 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
+    var diceArray = [SCNNode]()
+    
     @IBOutlet var sceneView: ARSCNView!
     
     override func viewDidLoad() {
@@ -98,6 +100,90 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let touchLocation = touch.location(in: sceneView)
+            let results = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+            
+//            if !results.isEmpty {
+//                print("Touched the plane.")
+//            } else {
+//                print("Touched outside the plane.")
+//            }
+            
+            if let hitResult = results.first {
+                // print(hitResult)
+
+                let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true)
+                diceNode?.position = SCNVector3(
+                    x: hitResult.worldTransform.columns.3.x,
+                    // Add half of the height of the dice so they appear exactly on planar surface
+                    y: hitResult.worldTransform.columns.3.y + (diceNode?.boundingSphere.radius)!,
+                    z: hitResult.worldTransform.columns.3.z
+                )
+                
+                // Add the new Die to the array of Dice Nodes
+                diceArray.append(diceNode!)
+                
+                sceneView.scene.rootNode.addChildNode(diceNode!)
+                
+                roll(dice: diceNode!)
+ 
+            }
+            
+        }
+    }
+    
+    func rollAll() {
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                roll(dice: dice)
+            }
+        }
+    }
+    
+    func roll(dice: SCNNode) {
+        // Dice face shows 2 as default
+        
+        let random6 = Float(arc4random_uniform(6) + 1)
+        var randomX: Float
+        var randomZ: Float
+        
+        print(random6)
+        
+        switch random6 {
+            
+        case 1:
+            randomX = Float.pi/2
+            randomZ = 0
+        case 2:
+            randomX = 0
+            randomZ = 0
+        case 3:
+            randomX = 0
+            randomZ = Float.pi/2
+        case 4:
+            randomX = Float.pi
+            randomZ = 0
+        case 5:
+            randomX = 0
+            randomZ = -(Float.pi/2)
+        case 6:
+            randomX = Float.pi * (3/2)
+            randomZ = 0
+        default:
+            fatalError("This should never occur. Random Roll should be from 1 to 6.")
+        }
+        
+        dice.runAction(SCNAction.rotateBy(
+            x: CGFloat(6 * Float.pi + randomX),
+            y: CGFloat(6 * Float.pi),
+            z: CGFloat(6 * Float.pi + randomZ),
+            duration: 0.5)
+        )
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor {
             
